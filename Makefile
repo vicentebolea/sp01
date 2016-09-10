@@ -1,2 +1,2 @@
 all:
-	gcc -std=c99 -Wall -pedantic driver.c lru.c main.c
+	$(CC) -std=c99 -Wall -pedantic -ggdb driver.c lru.c main.c

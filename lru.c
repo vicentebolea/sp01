@@ -140,5 +140,13 @@ void lru_visitor(lru_t* lru, void(*f)(void*, const char*), void* arg) {
  *
  */
 void lru_destroy(lru_t* lru) {
+  node_t* node = lru->head;
+
+  while (node) {
+    node_t* tmp = node;
+    node = node->next;
+    free(tmp);
+  }
+
   free(lru);
 }

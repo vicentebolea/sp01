@@ -10,7 +10,7 @@ void driver_init(options_t* ops, int argc, char** argv) {
   }
 
   ops->lru_size = atoi(argv[1]);
-  strncpy(ops->input_file, argv[2], FILENAME_SIZE);
+  strncpy(ops->input_file, argv[2], FILENAME_MAX);
 
   ops->input_file_ptr = fopen(ops->input_file, "r");
   ops->output_file_ptr = fopen(ops->output_file, "w");
@@ -18,26 +18,38 @@ void driver_init(options_t* ops, int argc, char** argv) {
 }
 
 bool is_next(options_t* ops) {
-  return !feof(ops->input_file_ptr);
+  bool flag = true;
+  if (feof(ops->input_file_ptr))
+    flag = false;
+
+  else {
+    char achar = fgetc(ops->input_file_ptr);
+    if (feof(ops->input_file_ptr))
+      flag = false;
+
+    ungetc(achar, ops->input_file_ptr);
+  }
+  
+  return flag;
 }
 
 int next_input(options_t* ops) { 
   char input[16] = {0};
   fgets(input, 16, ops->input_file_ptr);
-  if (input[0] == '\0') 
-    exit(EXIT_FAILURE);
   return atoi(input);
 }
 
-int get_lru_size(options_t* ops) { 
+int driver_lru_size(options_t* ops) { 
   return ops->lru_size;
 }
 
-void print_lru_keys_to_file(options_t* ops, const char* line) {
+void driver_log_keys(void* op, const char* line) {
+  options_t* ops = (options_t*)op;
   fprintf(ops->output_file_ptr, "%s\n", line);
 }
 
-void print_lru_evicted_to_file(options_t* ops, int k) {
+void driver_log_evicted_keys(void* op, int k) {
+  options_t* ops = (options_t*)op;
   if (k == INT_MIN) {
     fprintf(ops->evict_file_ptr, "\n");
   } else {

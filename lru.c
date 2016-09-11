@@ -18,6 +18,9 @@ struct lru_t {
   size_t size;
 }; 
 
+/*
+ *
+ */
 static bool is_full (lru_t* lru) {
   node_t* node = lru->head;
   size_t current_size = 0;
@@ -30,6 +33,9 @@ static bool is_full (lru_t* lru) {
   return (lru->size <= current_size);
 }
 
+/*
+ *
+ */
 static int evict_node(lru_t* lru) {
   assert(lru->size > 1);
   int evicted_value = 0;
@@ -46,18 +52,25 @@ static int evict_node(lru_t* lru) {
   return evicted_value;
 }
 
-static bool find_and_insert(lru_t* lru, int input) {
+/*
+ *
+ */
+static void insert_head(lru_t* lru, node_t* node) {
+  node_t* tmp = lru->head;
+  lru->head = node;
+  lru->head->next = tmp;
+}
+
+/*
+ *
+ */
+static node_t* extract(lru_t* lru, int input) {
   node_t* node = lru->head;
-
   node_t* previous_node = NULL;
-  while (node) {
 
+  while (node) {
     if (node->key == input) {
       node_t* tmp = node->next;
-
-      node_t* tmp2 = lru->head;
-      lru->head = node;
-      lru->head->next = tmp2;
 
       if (previous_node != NULL) {
         previous_node->next = tmp;
@@ -65,54 +78,71 @@ static bool find_and_insert(lru_t* lru, int input) {
           lru->tail = previous_node;
         }
       }
-
-      return true;
-
+      return node;
     }
     previous_node = node;
     node = node->next;
   }
-  return false;
+  return NULL;
 }
 
+/*
+ *
+ */
 void lru_init(lru_t** lru, size_t size) {
   *lru = (lru_t*)calloc(1,sizeof(lru_t));
   (*lru)->size = size;
   (*lru)->head = (*lru)->tail = NULL;
 }
 
+/*
+ *
+ */
 int lru_insert(lru_t* lru, int input) {
   int evicted_key = INT_MIN;
-  if (lru->head == NULL) {
+  node_t* node = NULL;
+
+  if (!lru->head) {
     lru->head = lru->tail = malloc(sizeof(node_t));
     lru->head->next = NULL;
     lru->head->key = input;
 
-  } else if (!find_and_insert(lru, input)) {
-    if (is_full(lru)) {
-      evicted_key = evict_node(lru);
-    }
+  } else if ((node = extract(lru, input))) {
+    insert_head(lru, node);
 
-    node_t* tmp = lru->head;
-    lru->head = malloc(sizeof(node_t));
-    lru->head->next = tmp;
-    lru->head->key = input;
+  } else {
+    if (is_full(lru))
+      evicted_key = evict_node(lru);
+
+    node = malloc(sizeof(node_t));
+    node->key = input;
+    insert_head(lru, node);
   }
   return evicted_key;
 }
 
-void lru_print(lru_t* lru, char** line) {
+/*
+ *
+ */
+void lru_visitor(lru_t* lru, void(*f)(void*, const char*), void* arg) {
   node_t* node = lru->head;
-  bzero(*line, LRU_PRINT_STRING);
+  char line[LRU_PRINT_STRING];
+  bzero(line, LRU_PRINT_STRING);
 
   while (node) {
-    char str[15];
-    sprintf(str, "%d ", node->key);
-    strcat(*line, str);
+    char str[LRU_PRINT_STRING];
+    sprintf(str, "%d", node->key);
+    strcat(line, str);
     node = node->next;
+    if (node)
+      strcat(line, " ");
   }
+  f(arg, line);
 }
 
+/*
+ *
+ */
 void lru_destroy(lru_t* lru) {
   free(lru);
 }

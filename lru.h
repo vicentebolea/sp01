@@ -11,5 +11,5 @@ typedef struct lru_t lru_t;
 
 void lru_init(lru_t**, size_t);
 int lru_insert(lru_t*, int);
-void lru_print(lru_t*, char**);
+void lru_visitor(lru_t*, void(*)(void*, const char*), void*);
 void lru_destroy(lru_t*);

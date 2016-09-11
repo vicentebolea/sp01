@@ -100,14 +100,9 @@ void lru_init(lru_t** lru, size_t size) {
  */
 int lru_insert(lru_t* lru, int input) {
   int evicted_key = INT_MIN;
+
   node_t* node = NULL;
-
-  if (!lru->head) {
-    lru->head = lru->tail = malloc(sizeof(node_t));
-    lru->head->next = NULL;
-    lru->head->key = input;
-
-  } else if ((node = extract(lru, input))) {
+  if ((node = extract(lru, input))) {
     insert_head(lru, node);
 
   } else {
@@ -116,6 +111,12 @@ int lru_insert(lru_t* lru, int input) {
 
     node = malloc(sizeof(node_t));
     node->key = input;
+
+    if (!lru->head) {
+      lru->tail = node;
+      node->next = NULL;
+    }
+
     insert_head(lru, node);
   }
   return evicted_key;
@@ -125,18 +126,13 @@ int lru_insert(lru_t* lru, int input) {
  *
  */
 void lru_visitor(lru_t* lru, void(*f)(void*, const char*), void* arg) {
-  node_t* node = lru->head;
-  char line[LRU_PRINT_STRING];
-  bzero(line, LRU_PRINT_STRING);
+  char line[LRU_PRINT_STRING] = {0};
 
-  while (node) {
-    char str[LRU_PRINT_STRING];
-    sprintf(str, "%d", node->key);
-    strcat(line, str);
-    node = node->next;
-    if (node)
-      strcat(line, " ");
-  }
+  node_t* node = lru->head;
+  for (; node; node = node->next)
+    sprintf(line, "%s%d ", line, node->key);
+
+  line[strlen(line) - 1] = '\0';
   f(arg, line);
 }
 

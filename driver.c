@@ -2,19 +2,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
 
-void driver_init(options_t* ops, int argc, char** argv) {
+struct options_t {
+  char input_file[FILENAME_MAX];
+  char output_file[FILENAME_MAX];
+  char evict_file[FILENAME_MAX];
+  FILE* output_file_ptr;
+  FILE* input_file_ptr;
+  FILE* evict_file_ptr;
+  size_t lru_size;
+};
+
+void driver_init(options_t** ops, int argc, char** argv, const char* of, const char* ef) {
   if (argc != 3) {
     perror("Relaunch with args [size of lru] inputfile");
     exit(EXIT_FAILURE);
   }
 
-  ops->lru_size = atoi(argv[1]);
-  strncpy(ops->input_file, argv[2], FILENAME_MAX);
+  *ops = calloc(1, sizeof(options_t));
+  (*ops)->lru_size = atoi(argv[1]);
+  strncpy((*ops)->input_file, argv[2], FILENAME_MAX);
 
-  ops->input_file_ptr = fopen(ops->input_file, "r");
-  ops->output_file_ptr = fopen(ops->output_file, "w");
-  ops->evict_file_ptr = fopen(ops->evict_file, "w");
+  strncpy(ops->output_file, of, FILENAME_MAX);
+  strncpy(ops->output_file, ef, FILENAME_MAX);
+  (*ops)->input_file_ptr = fopen((*ops)->input_file, "r");
+  (*ops)->output_file_ptr = fopen((*ops)->output_file, "w");
+  (*ops)->evict_file_ptr = fopen((*ops)->evict_file, "w");
 }
 
 bool is_next(options_t* ops) {
@@ -43,6 +58,14 @@ int driver_lru_size(options_t* ops) {
   return ops->lru_size;
 }
 
+void driver_set_output_file(options_t* ops, const char* fn) {
+  strncpy(ops->output_file, fn, FILENAME_MAX);
+}
+
+void driver_set_evict_file(options_t* ops, const char* fn) {
+  strncpy(ops->evict_file, fn, FILENAME_MAX);
+}
+
 void driver_log_keys(void* op, const char* line) {
   options_t* ops = (options_t*)op;
   fprintf(ops->output_file_ptr, "%s\n", line);
@@ -61,4 +84,5 @@ void driver_close(options_t* ops) {
   fclose(ops->input_file_ptr);
   fclose(ops->output_file_ptr);
   fclose(ops->evict_file_ptr);
+  free(ops);
 }

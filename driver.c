@@ -49,17 +49,42 @@ void driver_init(options_t** ops, int argc, char** argv, const char* of, const c
   op->evict_file_ptr = fopen(op->evict_file, "w");
 }
 
-int driver_next_input(options_t* ops) { 
+int32_t driver_next_input(options_t* ops) { 
   if (!is_next(ops))
-    return 0;
+    return -1;
 
-  char input[16] = {0};
-  fgets(input, 16, ops->input_file_ptr);
-  return atoi(input);
+  int32_t size;
+  fscanf(ops->input_file_ptr, "%i\n" , &size);
+  return size;
+}
+
+int32_t driver_next_input_extended(options_t* ops, bool* is_resize) { 
+  if (!is_next(ops))
+    return -1;
+
+  *is_resize = false;
+
+  char next_char = fgetc(ops->input_file_ptr);
+  if (next_char == 'R') {
+   *is_resize = true;
+   next_char = fgetc(ops->input_file_ptr);
+
+  } else {
+    ungetc(next_char, ops->input_file_ptr);
+  }
+
+  int32_t size = 0;  
+  fscanf(ops->input_file_ptr, "%i\n" , &size);
+
+  return size;
 }
 
 int driver_lru_size(options_t* ops) { 
   return ops->lru_size;
+}
+
+FILE* driver_get_output_fd(options_t* ops) { 
+  return ops->output_file_ptr;
 }
 
 void driver_log_keys(void* op, const char* line) {

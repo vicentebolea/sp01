@@ -10,10 +10,10 @@ int main(int argc, char *argv[]) {
   driver_init(&ops, argc, argv, "list.txt", "evict.txt");
   lru_init(&lru, driver_lru_size(ops));
 
-  int input;
-  while ((input = driver_next_input(ops))) {
+  int32_t input;
+  while (-1 != (input = driver_next_input(ops))) {
     int evicted_key = lru_insert(lru, input);
-    lru_visitor(lru, &driver_log_keys, ops);
+    lru_visitor(lru, driver_get_output_fd(ops));
     driver_log_evicted_keys(ops, evicted_key);
   }
 

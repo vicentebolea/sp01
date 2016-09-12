@@ -64,7 +64,7 @@ static void insert_head(lru_t* lru, node_t* node) {
 /*
  *
  */
-static node_t* extract(lru_t* lru, int input) {
+node_t* lru_remove(lru_t* lru, int input) {
   node_t* node = lru->head;
   node_t* previous_node = NULL;
 
@@ -76,7 +76,10 @@ static node_t* extract(lru_t* lru, int input) {
         previous_node->next = tmp;
         if (lru->tail == node) {
           lru->tail = previous_node;
+          lru->tail->next = NULL;
         }
+      } else {
+        lru->head = node->next;
       }
       return node;
     }
@@ -102,7 +105,7 @@ int lru_insert(lru_t* lru, int input) {
   int evicted_key = INT_MIN;
 
   node_t* node = NULL;
-  if ((node = extract(lru, input))) {
+  if ((node = lru_remove(lru, input))) {
     insert_head(lru, node);
 
   } else {
@@ -125,7 +128,7 @@ int lru_insert(lru_t* lru, int input) {
 /*
  *
  */
-void lru_visitor(lru_t* lru, void(*f)(void*, const char*), void* arg) {
+void lru_visitor(lru_t* lru, FILE* fd) {
   char line[LRU_PRINT_STRING] = {0};
 
   node_t* node = lru->head;
@@ -133,7 +136,7 @@ void lru_visitor(lru_t* lru, void(*f)(void*, const char*), void* arg) {
     sprintf(line, "%s%d ", line, node->key);
 
   line[strlen(line) - 1] = '\0';
-  f(arg, line);
+  fprintf(fd, "%s\n", line);
 }
 
 /*
@@ -149,4 +152,37 @@ void lru_destroy(lru_t* lru) {
   }
 
   free(lru);
+}
+
+void lru_resize(lru_t* lru, size_t size) {
+  if (size > lru->size) {
+    lru->size = size;
+
+  } else {
+    size_t current_size = 0;
+    node_t* node = lru->head;
+
+    while (node) {
+      node = node->next;
+      current_size++;
+    }
+
+    size_t to_evict = current_size - size;
+
+    while (to_evict--) {
+      evict_node(lru);
+    }
+  }
+}
+
+node_t* lru_search(lru_t* lru, int key) {
+  node_t* node = lru->head;
+
+  while (node) {
+    if (node->key == key) {
+      return node;
+    }
+    node = node->next;
+  }
+  return NULL;
 }

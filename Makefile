@@ -1,14 +1,17 @@
 SHELL := /bin/bash
 
-all: lru bonus1 p2
+all: lru bonus1 p2 bonus2
 
 lru: driver.c lru.c main.c
+	$(CC) -std=c99 -Wall -pedantic -ggdb -o $@ $^
+
+p2: driver.c lru.c s4lru.c problem2_S4LRU_20131780.c
 	$(CC) -std=c99 -Wall -pedantic -ggdb -o $@ $^
 
 bonus1: driver.c lru.c bonus1_LRU_20131780.c
 	$(CC) -std=c99 -Wall -pedantic -ggdb -o $@ $^
 
-p2: driver.c lru.c s4lru.c problem2_S4LRU_20131780.c
+bonus2: driver.c lru.c s4lru.c bonus2_LRU_20131780.c
 	$(CC) -std=c99 -Wall -pedantic -ggdb -o $@ $^
 
 clean:

@@ -64,6 +64,15 @@ static void insert_head(lru_t* lru, node_t* node) {
 /*
  *
  */
+void lru_init(lru_t** lru, size_t size) {
+  *lru = (lru_t*)calloc(1,sizeof(lru_t));
+  (*lru)->size = size;
+  (*lru)->head = (*lru)->tail = NULL;
+}
+
+/*
+ *
+ */
 node_t* lru_remove(lru_t* lru, int input) {
   node_t* node = lru->head;
   node_t* previous_node = NULL;
@@ -87,15 +96,6 @@ node_t* lru_remove(lru_t* lru, int input) {
     node = node->next;
   }
   return NULL;
-}
-
-/*
- *
- */
-void lru_init(lru_t** lru, size_t size) {
-  *lru = (lru_t*)calloc(1,sizeof(lru_t));
-  (*lru)->size = size;
-  (*lru)->head = (*lru)->tail = NULL;
 }
 
 /*

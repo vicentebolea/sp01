@@ -99,7 +99,8 @@ node_t* lru_remove(lru_t* lru, int input) {
 }
 
 /*
- *
+ * It returns INT_MIN if there is no evicted key.
+ * Otherwise, it will return the evicted key.
  */
 int lru_insert(lru_t* lru, int input) {
   int evicted_key = INT_MIN;

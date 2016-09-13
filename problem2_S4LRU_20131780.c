@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     driver_log_evicted_keys(ops, evicted_key);
   }
 
-  driver_close(ops);
+  driver_destroy(ops);
   s4lru_destroy(lru);
   
   return EXIT_SUCCESS;

@@ -1,10 +1,29 @@
+/*
+ * Author: Vicente Adolfo Bolea Sanchez 
+ * Date: Sep'16
+ * File: The following functions represent the public interface
+ * of the ADT of a LRU.
+ *
+ * Usage: 
+ *  lru_t* my_lru;
+ *  lru_init(&my_lru);
+ *  lru_insert(my_lru, 1);
+ *  lru_insert(my_lru, 2);
+ *  lru_insert(my_lru, 3);
+ *  lru_remove(my_lru, 2);
+ *  node_t* = lru_search(my_lru, 1);
+ *  lru_destroy(my_lru);
+ *
+ */
 #pragma once
 #include <stddef.h>
 #include <stdio.h>
 
 #define LRU_PRINT_STRING 256
 
-struct node_t;  
+// Hiding structures content to fullfill the
+// principle of least privilege
+struct node_t;
 typedef struct node_t node_t;  
 
 struct lru_t;  

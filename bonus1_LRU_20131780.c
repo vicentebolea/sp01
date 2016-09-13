@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     lru_visitor(lru, driver_get_output_fd(ops));
   }
 
-  driver_close(ops);
+  driver_destroy(ops);
   lru_destroy(lru);
   
   return EXIT_SUCCESS;

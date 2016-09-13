@@ -49,13 +49,22 @@ void driver_init(options_t** ops, int argc, char** argv, const char* of, const c
   op->evict_file_ptr = fopen(op->evict_file, "w");
 }
 
+/*
+ * It returns -1 in case of invalid output or 
+ * EOF reached.
+ */
 int32_t driver_next_input(options_t* ops) { 
   if (!is_next(ops))
     return -1;
 
-  int32_t size;
-  fscanf(ops->input_file_ptr, "%i\n" , &size);
-  return size;
+  int32_t input = 0;
+  int ret = fscanf(ops->input_file_ptr, "%i\n" , &input);
+  if (ret == 0) {
+    perror("Wrong format in the input");
+    driver_destroy(ops);
+    exit(EXIT_FAILURE);
+  }
+  return input;
 }
 
 int32_t driver_next_input_extended(options_t* ops, bool* is_resize) { 
@@ -101,7 +110,7 @@ void driver_log_evicted_keys(void* op, int k) {
   }
 }
 
-void driver_close(options_t* ops) {
+void driver_destroy(options_t* ops) {
   fclose(ops->input_file_ptr);
   fclose(ops->output_file_ptr);
   fclose(ops->evict_file_ptr);

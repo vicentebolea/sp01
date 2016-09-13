@@ -1,8 +1,8 @@
 SHELL := /bin/bash
 
-all: lru bonus1 p2 bonus2
+all: p1 bonus1 p2 bonus2
 
-lru: driver.c lru.c main.c
+p1: driver.c lru.c problem1_LRU_20131780.c
 	$(CC) -std=c99 -Wall -pedantic -ggdb -o $@ $^
 
 p2: driver.c lru.c s4lru.c problem2_S4LRU_20131780.c
@@ -15,10 +15,10 @@ bonus2: driver.c lru.c s4lru.c bonus2_LRU_20131780.c
 	$(CC) -std=c99 -Wall -pedantic -ggdb -o $@ $^
 
 clean:
-	-rm lru bonus1 p2 bonus2
+	-rm p1 bonus1 p2 bonus2
 
 test: all
-	@./lru 4 input.txt;                                \
+	@./p1 4 input.txt;                                \
 	diff <(echo "$$lru_expected_output") list.txt;     \
 	if [ "$$?" == "0" ];  then                         \
 	  echo "Passed LRU";                               \
